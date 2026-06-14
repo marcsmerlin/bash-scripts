@@ -43,51 +43,6 @@ Options:
 EOF
 }
 
-#
-# revive_fsa_file_from_directory <fsa-file-spec | error-trace out> \
-#   <fsa-directory-rspec> \
-#   <prefix> \
-#   <image-directory> \
-#   <image-size>
-#
-revive_fsa_file_from_directory() {
-    local fsa_directory_rspec="$2"
-    local prefix="$3"
-    local image_directory="$4"
-    local image_size="$5"
-
-    local tmpvar="$(make_tmpvar)"
-
-    mspec_temp_mount_rspec "$tmpvar" "$fsa_directory_rspec" 'require-exisiting' || {
-        forward_error "$1" "${!tmpvar}"
-        return 1
-    }
-
-    local mspec="${!tmpvar}"
-    local fsa_directory="$(mspec_path "$mspec")"
-    local pattern="$(_fsa_pattern_from_prefix "$prefix")"
-
-    pick_and_process_entry_from_directory "$tmpvar" \
-        'index of file to revive? ' \
-        "$fsa_directory" \
-        "$pattern" \
-        create_fsa_file_image "$image_directory" "$image_size" || {
-
-        defer_forward_error "$1" \
-            "${!tmpvar}" \
-            mspec_release "$mspec"
-
-        return 1
-    }
-
-    mspec_release "$tmpvar" "$mspec" || {
-        forward_error "$1" "${!tmpvar}"
-        return 1
-    }
-
-    copy_out_result "$1" "${!tmpvar}"
-    return 0
-}
 
 #
 # revive-fsa-file-from-directory <fsa-directory-rspec> \
