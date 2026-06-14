@@ -28,10 +28,6 @@ source "$BASH_LIBS_DIR/rspec_lib.bash"
 source "$BASH_LIBS_DIR/mspec_lib.bash"
 (($? == 0)) || return 1
 
-# shellcheck source=./picker_lib.bash
-source "$BASH_LIBS_DIR/picker_lib.bash"
-(($? == 0)) || return 1
-
 #
 # _fsarchiver_savefs <error-trace out> <fsa-file> <fs-dev>
 #
@@ -131,6 +127,25 @@ create_fsa_file() {
 }
 
 #
+# archive_file_system <fsa-file_rspec | error-trace out> <file-system> <top-level-rspec>
+#
+archive_file_system() {
+    local file_system="$2"
+    local top_level_rspec="$3"
+
+    local rspec="$(rspec_extend_path "$top_level_rspec" "$_fsa_archive_sentinel")"
+    local tmpvar="$(make_tmpvar)"
+
+    create_fsa_file "$tmpvar" "$file_system" "$rspec" || {
+        forward_error "$1" "${!tmpvar}"
+        return 1
+    }
+
+    copy_out_result "$1" "${!tmpvar}"
+    return 0
+}
+
+#
 # _fsarchiver_archinfo <error-trace out> <fsa-file>
 #
 _fsarchiver_archinfo() {
@@ -154,6 +169,10 @@ _fsarchiver_archinfo() {
 
     return 0
 }
+
+# shellcheck source=./picker_lib.bash
+source "$BASH_LIBS_DIR/picker_lib.bash"
+(($? == 0)) || return 1
 
 #
 # _inspect_fsa_directory <error-trace out> <resource-spec> <pattern>
@@ -236,25 +255,6 @@ inspect_fsa_archive() {
         return 1
     }
 
-    return 0
-}
-
-#
-# archive_file_system <fsa-file_rspec | error-trace out> <file-system> <top-level-rspec>
-#
-archive_file_system() {
-    local file_system="$2"
-    local top_level_rspec="$3"
-
-    local rspec="$(rspec_extend_path "$top_level_rspec" "$_fsa_archive_sentinel")"
-    local tmpvar="$(make_tmpvar)"
-
-    create_fsa_file "$tmpvar" "$file_system" "$rspec" || {
-        forward_error "$1" "${!tmpvar}"
-        return 1
-    }
-
-    copy_out_result "$1" "${!tmpvar}"
     return 0
 }
 
