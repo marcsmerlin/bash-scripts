@@ -33,7 +33,7 @@ source "$BASH_LIBS_DIR/picker_lib.bash"
 (($? == 0)) || return 1
 
 #
-# fsarchiver_savefs <error-trace out> <fsa-file> <fs-dev>
+# _fsarchiver_savefs <error-trace out> <fsa-file> <fs-dev>
 #
 _fsarchiver_savefs() {
     local fsa_file="$2"
@@ -263,16 +263,40 @@ source "$BASH_LIBS_DIR/loop_device_lib.bash"
 (($? == 0)) || return 1
 
 #
-# create_fsa_file_image <image-file | error-trace-out> <fsa-file> <image-size> <destination-directory>
+# _fsarchiver_restfs <error-trace out> <fsa-file> <loop-device>
+#
+_fsarchiver_restfs() {
+    local fsa_file="$2"
+    local loopdev="$3"
+
+    local tmpvar="$(make_tmpvar)"
+    local rc
+
+    sudo_context_capture "$tmpvar" \
+        fsarchiver restfs "$fsa_file" id=0,dest="$loopdev"
+
+    rc="$?"
+
+    ((rc == 0)) || {
+        originate_error "$1" "${!tmpvar}"
+    }
+
+    return "$rc"
+}
+
+# create_fsa_file_image <image-file | error-trace-out> \
+#   <fsa-file> \
+#   <image-size> \
+#   <destination-directory>
 #
 create_fsa_file_image() {
     local fsa_file="$2"
-    local image_size="$3"
-    local destination_directory="$4"
+    local image_directory="$3"
+    local image_size="$4"
 
     local basename=${fsa_file##*/}
     basename=${basename%.*}
-    local image_file="$destination_directory/${basename}.img"
+    local image_file="$image_directory/${basename}.img"
 
     local tmpvar="$(make_tmpvar)"
 
@@ -283,36 +307,14 @@ create_fsa_file_image() {
 
     local loopdev="${!tmpvar}"
 
-    fsarchiver restfs "$fsa_file" id=0,dest="$loopdev" || {
-        originate_error "$1" \
-            'fsarchiver restfs failed for "%s".\n' \
-            "$fsa_file"
-
+    _fsarchiver_restfs "$tmpvar" "$fsa_file" "$loopdev" || {
+        forward_error "$1" "${!tmpvar}"
+        sudo_detach_loop_device "$loopdev"
         return 1
     }
 
-    detach_loop_device "$loopdev"
+    sudo_detach_loop_device "$loopdev"
 
     copy_out_result "$1" "$image_file"
     return 0
 }
-
-#
-# revive_fsa_archive <image_file | error-trace out> <top-level-rspec> [<prefix>]
-#
-revive_fsa_archive() {
-    local top_level_rspec="$2"
-    local prefix="$3"
-
-    local rspec="$(rspec_extend_path "$top_level_rspec" "$_fsa_archive_sentinel")"
-    local tmpvar="$(make_tmpvar)"
-
-    inspect_fsa_directory "$tmpvar" "$rspec" "$prefix" || {
-        forward_error "$1" "${!tmpvar}"
-        return 1
-    }
-
-    return 0
-}
-
-

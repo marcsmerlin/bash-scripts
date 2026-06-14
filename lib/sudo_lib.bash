@@ -190,3 +190,34 @@ sudo_chown() {
 
     return 0
 }
+
+#
+# sudo_attach_loop_device <loop-device | error-trace out> <file_name>
+#
+sudo_attach_loop_device() {
+    local file_name="$2"
+
+    local tmpvar="$(make_tmpvar)"
+
+    sudo_context_capture "$tmpvar" \
+        losetup --find --show "$file_name"
+
+    rc="$?"
+
+    ((rc == 0)) || {
+        originate_error "$1" \
+            'Unable to attach loop device to "%s".\n' \
+            "$file_name"
+        return 1
+    }
+
+    copy_out_result "$1" "${!tmpvar}"
+    return 0
+}
+
+#
+# sudo_detach_loop_device <loop-device>
+#
+sudo_detach_loop_device() {
+    sudo losetup --detach "$1"
+}
