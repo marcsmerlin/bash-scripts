@@ -28,7 +28,7 @@ show_help() {
 
     cat <<EOF
 Usage:
-  $command_name <fsa-directory-rspec> <destination-directory> [OPTIONS]
+  $command_name <fsa-directory-rspec> <image-directory> [OPTIONS]
 
 Options:
   --help
