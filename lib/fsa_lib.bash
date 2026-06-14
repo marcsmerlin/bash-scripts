@@ -320,13 +320,13 @@ create_fsa_file_image() {
 }
 #
 #
-# revive_fsa_file_from_directory <fsa-file-spec | error-trace out> \
+# revive_fsa_directory <fsa-file-spec | error-trace out> \
 #   <fsa-directory-rspec> \
 #   <prefix> \
 #   <image-directory> \
 #   <image-size>
 #
-revive_fsa_file_from_directory() {
+revive_fsa_directory() {
     local fsa_directory_rspec="$2"
     local prefix="$3"
     local image_directory="$4"
@@ -362,5 +362,27 @@ revive_fsa_file_from_directory() {
     }
 
     copy_out_result "$1" "${!tmpvar}"
+    return 0
+}
+
+#
+# revive_fsa_archive <error-trace out> <top-level-rspec> <prefix> <image_directory> <image-size>
+#
+revive_fsa_archive() {
+    local top_level_rspec="$2"
+    local prefix="$3"
+    local image_directory="$4"
+    local image_size="$5"
+
+    local rspec="$(rspec_extend_path "$top_level_rspec" "$_fsa_archive_sentinel")"
+    local tmpvar="$(make_tmpvar)"
+
+    revive_fsa_directory "$tmpvar" \
+        "$rspec" "$prefix" "$image_directory" "$image_size" || {
+
+        forward_error "$1" "${!tmpvar}"
+        return 1
+    }
+
     return 0
 }

@@ -99,7 +99,7 @@ fi
 
 declare result
 
-revive_fsa_file_from_directory result "$fsa_rspec" "$prefix" "$image_directory" "$image_size" || {
+revive_fsa_directory result "$fsa_rspec" "$prefix" "$image_directory" "$image_size" || {
     print_error_trace "$result"
     exit 1
 }

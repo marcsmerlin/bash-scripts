@@ -3,7 +3,7 @@
 # shellcheck disable=SC2181 # Check exit code directly with e.g. `if mycmd;`, not indirectly with `$?`.
 
 [[ ${_sudo_lib_included:-} ]] && return 0
-readonly _sudo_lib_include=1
+readonly _sudo_lib_included=1
 
 if [[ -z ${BASH_LIBS_DIR:-} ]]; then
     readonly BASH_LIBS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
