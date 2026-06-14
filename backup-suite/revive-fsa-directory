@@ -43,10 +43,8 @@ Options:
 EOF
 }
 
-
 #
-# revive-fsa-file-from-directory <fsa-directory-rspec> \
-#   <destination-directory> [OPTIONS]
+# revive-fsa-directory <fsa-directory-rspec> <image-directory> [OPTIONS]
 #
 error_trace=""
 
