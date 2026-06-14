@@ -384,5 +384,6 @@ revive_fsa_archive() {
         return 1
     }
 
+    copy_out_result "$1" "${!tmpvar}"
     return 0
 }
