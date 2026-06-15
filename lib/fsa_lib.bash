@@ -20,12 +20,8 @@ readonly _fsa_lib_included=1
 source "$BASH_LIBS_DIR/result_type_lib.bash"
 (($? == 0)) || return 1
 
-# shellcheck source=./rspec_lib.bash
-source "$BASH_LIBS_DIR/rspec_lib.bash"
-(($? == 0)) || return 1
-
-# shellcheck source=./mspec_lib.bash
-source "$BASH_LIBS_DIR/mspec_lib.bash"
+# shellcheck source=./sudo_lib.bash
+source "$BASH_LIBS_DIR/sudo_lib.bash"
 (($? == 0)) || return 1
 
 #
@@ -72,9 +68,19 @@ _make_fsa_file_name() {
         "$(date +%F)" \
         "$(date +%H-%M-%S)"
 }
+#
+# shellcheck source=./rspec_lib.bash
+source "$BASH_LIBS_DIR/rspec_lib.bash"
+(($? == 0)) || return 1
+
+# shellcheck source=./mspec_lib.bash
+source "$BASH_LIBS_DIR/mspec_lib.bash"
+(($? == 0)) || return 1
 
 #
-# create_fsa_file <error-trace | fsa-file-rspec out> <file-system> <resource-spec>
+# create_fsa_file <error-trace | fsa-file-rspec out> \
+#   <file-system> \
+#   <resource-spec>
 #
 create_fsa_file() {
     local file_system="$2"
@@ -127,7 +133,9 @@ create_fsa_file() {
 }
 
 #
-# archive_file_system <fsa-file_rspec | error-trace out> <file-system> <top-level-rspec>
+# archive_file_system <fsa-file_rspec | error-trace out> \
+#   <file-system> \
+#   <top-level-rspec>
 #
 archive_file_system() {
     local file_system="$2"
@@ -170,16 +178,24 @@ _fsarchiver_archinfo() {
     return 0
 }
 
+#
+# _fsa_pattern_from_prefix <prefix>
+#
+_fsa_pattern_from_prefix() {
+    local prefix="$1"
+    printf '%s\n' "${prefix}"'*.fsa'
+}
+
 # shellcheck source=./picker_lib.bash
 source "$BASH_LIBS_DIR/picker_lib.bash"
 (($? == 0)) || return 1
 
 #
-# _inspect_fsa_directory <error-trace out> <resource-spec> <pattern>
+# inspect_fsa_directory <error-trace out> <resource-spec> <prefix>
 #
-_inspect_fsa_directory() {
+inspect_fsa_directory() {
     local rspec="$2"
-    local pattern="$3"
+    local prefix="$3"
 
     local tmpvar="$(make_tmpvar)"
 
@@ -190,6 +206,7 @@ _inspect_fsa_directory() {
 
     local mspec="${!tmpvar}"
     local directory="$(mspec_path "$mspec")"
+    local pattern="$(_fsa_pattern_from_prefix "$prefix")"
 
     pick_and_process_entry_from_directory "$tmpvar" \
         'index of file to inspect? ' \
@@ -204,33 +221,6 @@ _inspect_fsa_directory() {
     }
 
     mspec_release "$tmpvar" "$mspec" || {
-        forward_error "$1" "${!tmpvar}"
-        return 1
-    }
-
-    return 0
-}
-
-#
-# _fsa_pattern_from_prefix <prefix>
-#
-_fsa_pattern_from_prefix() {
-    local prefix="$1"
-    printf '%s\n' "${prefix}"'*.fsa'
-}
-
-#
-# inspect_fsa_directory <error-trace out> <rspec> <prefix>
-#
-inspect_fsa_directory() {
-    local rspec="$2"
-    local prefix="$3"
-
-    local tmpvar="$(make_tmpvar)"
-
-    _inspect_fsa_directory "$tmpvar" \
-        "$rspec" "$(_fsa_pattern_from_prefix "$prefix")" || {
-
         forward_error "$1" "${!tmpvar}"
         return 1
     }
@@ -366,7 +356,11 @@ revive_fsa_directory() {
 }
 
 #
-# revive_fsa_archive <error-trace out> <top-level-rspec> <prefix> <image_directory> <image-size>
+# revive_fsa_archive <error-trace out> \
+#   <top-level-rspec> \
+#   <prefix> \
+#   <image_directory> \
+#   <image-size>
 #
 revive_fsa_archive() {
     local top_level_rspec="$2"
