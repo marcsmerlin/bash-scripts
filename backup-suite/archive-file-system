@@ -19,8 +19,8 @@ source "$BASH_LIBS_DIR/result_type_lib.bash"
 source "$BASH_LIBS_DIR/rspec_lib.bash"
 (($? == 0)) || exit 1
 
-# shellcheck source=../lib/fsa_lib.bash
-source "$BASH_LIBS_DIR/fsa_lib.bash"
+# shellcheck source=../lib/fsa_archive_lib.bash
+source "$BASH_LIBS_DIR/fsa_archive_lib.bash"
 (($? == 0)) || exit 1
 
 show_help() {
@@ -38,7 +38,7 @@ EOF
 }
 
 #
-# archive-file-system <file-system> <rspec> [OPTIONS]
+# archive-file-system <file-system> <top-level-rspec> [OPTIONS]
 #
 error_trace=""
 
@@ -73,7 +73,9 @@ rspec_normalize top_level_rspec "$raw_rspec" || {
     exit 1
 }
 
-printf_stderr 'Archiving "%s" to "%s" ...\n' "$file_system" "$(rspec_format "$top_level_rspec")"
+printf_stderr 'Archiving "%s" to "%s" ...\n' \
+    "$file_system" \
+    "$(rspec_format "$top_level_rspec")"
 
 declare result
 

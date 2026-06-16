@@ -19,8 +19,12 @@ source "$BASH_LIBS_DIR/result_type_lib.bash"
 source "$BASH_LIBS_DIR/rspec_lib.bash"
 (($? == 0)) || exit 1
 
-# shellcheck source=../lib/fsa_lib.bash
-source "$BASH_LIBS_DIR/fsa_lib.bash"
+# shellcheck source=../lib/fsa_revive_lib.bash
+source "$BASH_LIBS_DIR/fsa_revive_lib.bash"
+(($? == 0)) || exit 1
+
+# shellcheck source=../lib/system_lib.bash
+source "$BASH_LIBS_DIR/system_lib.bash"
 (($? == 0)) || exit 1
 
 show_help() {
@@ -97,7 +101,12 @@ fi
 
 declare result
 
-revive_fsa_directory result "$fsa_rspec" "$prefix" "$image_directory" "$image_size" || {
+revive_fsa_directory result \
+    "$fsa_rspec" \
+    "$prefix" \
+    "$image_directory" \
+    "$image_size" || {
+
     print_error_trace "$result"
     exit 1
 }

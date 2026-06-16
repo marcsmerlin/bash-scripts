@@ -19,8 +19,8 @@ source "$BASH_LIBS_DIR/result_type_lib.bash"
 source "$BASH_LIBS_DIR/rspec_lib.bash"
 (($? == 0)) || exit 1
 
-# shellcheck source=../lib/fsa_lib.bash
-source "$BASH_LIBS_DIR/fsa_lib.bash"
+# shellcheck source=../lib/fsa_inspect_lib.bash
+source "$BASH_LIBS_DIR/fsa_inspect_lib.bash"
 (($? == 0)) || exit 1
 
 show_help() {
