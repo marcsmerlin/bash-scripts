@@ -24,10 +24,10 @@ trim_string() {
 }
 
 #
-# printf_stderr
+# printf_display
 #
 # shellcheck disable=SC2059 # Don't use variables in the `printf` format string.
-printf_stderr() {
+printf_display() {
     printf "$@" >&2
 }
 
@@ -62,7 +62,7 @@ verify_script_dependencies() {
 
     for command in "$@"; do
         if ! has_command "$command"; then
-            printf_stderr \
+            printf_display \
                 'The command "%s" is missing and must be installed in order to proceed.\n' \
                 "$command"
             return 1

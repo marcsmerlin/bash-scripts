@@ -26,7 +26,7 @@ _fsarchiver_archinfo() {
     local rc
 
     [[ -n "$fsa_file" ]] || {
-        printf_stderr 'No fsa file selected.\n'
+        printf_display 'No fsa file selected.\n'
         return 0
     }
 

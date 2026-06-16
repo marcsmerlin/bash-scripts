@@ -111,6 +111,6 @@ revive_fsa_directory result \
     exit 1
 }
 
-printf_stderr 'Image file "%s" created.\n' "$result"
+printf_display 'Image file "%s" created.\n' "$result"
 
 exit 0

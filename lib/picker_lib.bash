@@ -71,7 +71,7 @@ _pick_index_from_collection() {
 
     for ((index = 0; index < number_of_entries; index++)); do
         entry="${_namref_pick_index_from_collection[$index]}"
-        printf_stderr '%d) %s\n' "$index" "$(basename "$entry")"
+        printf_display '%d) %s\n' "$index" "$(basename "$entry")"
     done
 
     local tmpvar="$(make_tmpvar)"
