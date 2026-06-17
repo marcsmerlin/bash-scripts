@@ -56,14 +56,14 @@ if has_command_line_opt "help"; then
     exit 0
 fi
 
-declare -i arg_count
+declare arg_count
 
 get_command_line_arg_count arg_count
 
-if [[ arg_count -ne 3 ]]; then
+((arg_count == 3)) || {
     show_help "$0"
     exit 2
-fi
+}
 
 declare user directory raw_rspec
 

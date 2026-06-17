@@ -61,10 +61,10 @@ declare arg_count
 
 get_command_line_arg_count arg_count
 
-if ((arg_count != 1)); then
+((arg_count == 1)) || {
     show_help "$0"
     exit 2
-fi
+}
 
 declare raw_rspec rspec
 
