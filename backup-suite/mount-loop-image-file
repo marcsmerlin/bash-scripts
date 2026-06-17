@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+
+# shellcheck disable=SC2155 # Declare and assign separately to avoid masking return values.
+# shellcheck disable=SC2181 # Check exit code directly with e.g. `if mycmd;`, not indirectly with `$?`.
+
+readonly SCRIPT_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
+readonly PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+readonly BASH_LIBS_DIR="$PROJECT_ROOT/lib"
+
+# shellcheck source=../lib/command_line_lib.bash
+source "$BASH_LIBS_DIR/command_line_lib.bash"
+(($? == 0)) || exit 1
+
+# shellcheck source=../lib/result_type_lib.bash
+source "$BASH_LIBS_DIR/result_type_lib.bash"
+(($? == 0)) || exit 1
+
+# shellcheck source=../lib/loop_device_lib.bash
+source "$BASH_LIBS_DIR/loop_device_lib.bash"
+(($? == 0)) || exit 1
+
+show_help() {
+    local command_name="${1##*/}"
+
+    cat <<EOF
+Usage:
+  $command_name <loop-image-file> <mount-point> [OPTIONS]
+
+Options:
+  --help
+      Show this help message and exit.
+
+EOF
+}
+
+#
+# mount-loop-image-file <loop-image-file> <mount-point> [OPTIONS]
+#
+error_trace=""
+
+getopt_spec="help"
+
+register_command_line error_trace "$getopt_spec" "$@" || {
+    print_error_trace "$error_trace"
+    exit 1
+}
+
+if has_command_line_opt "help"; then
+    show_help "$0"
+    exit 0
+fi
+
+declare arg_count
+
+get_command_line_arg_count arg_count
+
+((arg_count == 2)) || {
+    show_help "$0"
+    exit 2
+}
+
+declare loop_image_file mount_point
+
+get_command_line_arg 1 loop_image_file
+get_command_line_arg 2 mount_point
+
+declare result
+
+mount_loop_image_file result "$loop_image_file" "$mount_point" || {
+    print_error_trace "$result"
+    exit 1
+}
+
+loop_device="$result"
+
+printf_display 'Mounted "%s" on "%s" using loop device "%s."\n' \
+    "$loop_image_file" "$mount_point" "$loop_device"
+read -r -p 'Press enter to unmount and detach ...'
+
+unmount_loop_device result "$loop_device" || {
+    print_error_trace "$result"
+    exit 1
+}
+
+exit 0
